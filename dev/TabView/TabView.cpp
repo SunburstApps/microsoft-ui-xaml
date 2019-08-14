@@ -329,10 +329,43 @@ void TabView::OnListViewSelectionChanged(const winrt::IInspectable& sender, cons
     m_selectionChangedEventSource(*this, args);
 }
 
+winrt::TabViewItem TabView::FindTabViewItemFromDragItem(const winrt::IInspectable& item)
+{
+    auto tab = ContainerFromItem(item).try_as<winrt::TabViewItem>();
+
+    if (!tab)
+    {
+        if (auto fe = item.try_as<winrt::FrameworkElement>())
+        {
+            tab = winrt::VisualTreeHelper::GetParent(fe).try_as<winrt::TabViewItem>();
+        }
+    }
+
+    if (!tab)
+    {
+        // This is a fallback scenario for tabs without a data context
+        auto numItems = static_cast<int>(TabItems().Size());
+        for (int i = 0; i < numItems; i++)
+        {
+            auto tabItem = ContainerFromIndex(i).try_as<winrt::TabViewItem>();
+            if (tabItem.Content() == item)
+            {
+                tab = tabItem;
+                break;
+            }
+        }
+    }
+
+    return tab;
+}
 
 void TabView::OnListViewDragItemsStarting(const winrt::IInspectable& sender, const winrt::DragItemsStartingEventArgs& args)
 {
-    m_tabStripDragItemsStartingEventSource(*this, args);
+    auto item = args.Items().GetAt(0);
+    auto tab = FindTabViewItemFromDragItem(item);
+    auto myArgs = winrt::make_self<TabViewTabDragStartingEventArgs>(args, item, tab);
+
+    m_tabDragStartingEventSource(*this, *myArgs);
 }
 
 void TabView::OnListViewDragOver(const winrt::IInspectable& sender, const winrt::DragEventArgs& args)
@@ -347,37 +380,15 @@ void TabView::OnListViewDrop(const winrt::IInspectable& sender, const winrt::Dra
 
 void TabView::OnListViewDragItemsCompleted(const winrt::IInspectable& sender, const winrt::DragItemsCompletedEventArgs& args)
 {
-    m_tabStripDragItemsCompletedEventSource(*this, args);
+    auto item = args.Items().GetAt(0);
+    auto tab = FindTabViewItemFromDragItem(item);
+    auto myArgs = winrt::make_self<TabViewTabDragCompletedEventArgs>(args, item, tab);
+
+    m_tabDragCompletedEventSource(*this, *myArgs);
 
     // None means it's outside of the tab strip area
     if (args.DropResult() == winrt::DataPackageOperation::None)
     {
-        const auto item = args.Items().GetAt(0);
-        auto tab = ContainerFromItem(item).try_as<winrt::TabViewItem>();
-
-        if (!tab)
-        {
-            if (auto fe = item.try_as<winrt::FrameworkElement>())
-            {
-                tab = winrt::VisualTreeHelper::GetParent(fe).try_as<winrt::TabViewItem>();
-            }
-        }
-
-        if (!tab)
-        {
-            // This is a fallback scenario for tabs without a data context
-            auto numItems = static_cast<int>(TabItems().Size());
-            for (int i = 0; i < numItems; i++)
-            {
-                auto tabItem = ContainerFromIndex(i).try_as<winrt::TabViewItem>();
-                if (tabItem.Content() == item)
-                {
-                    tab = tabItem;
-                    break;
-                }
-            }
-        }
-
         auto myArgs = winrt::make_self<TabViewTabDroppedOutsideEventArgs>(item, tab);
         m_tabDroppedOutsideEventSource(*this, *myArgs);
     }

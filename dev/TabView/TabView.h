@@ -10,6 +10,8 @@
 #include "TabView.properties.h"
 #include "TabViewTabCloseRequestedEventArgs.g.h"
 #include "TabViewTabDroppedOutsideEventArgs.g.h"
+#include "TabViewTabDragStartingEventArgs.g.h"
+#include "TabViewTabDragCompletedEventArgs.g.h"
 #include "DispatcherHelper.h"
 
 class TabViewTabCloseRequestedEventArgs :
@@ -36,6 +38,40 @@ public:
     winrt::TabViewItem Tab() { return m_tab.get(); }
 
 private:
+    winrt::IInspectable m_item{};
+    tracker_ref<winrt::TabViewItem> m_tab{ this };
+};
+
+class TabViewTabDragStartingEventArgs :
+    public ReferenceTracker<TabViewTabDragStartingEventArgs, winrt::implementation::TabViewTabDragStartingEventArgsT, winrt::composing, winrt::composable>
+{
+public:
+    TabViewTabDragStartingEventArgs(winrt::DragItemsStartingEventArgs const& args, winrt::IInspectable const& item, winrt::TabViewItem tab) { m_args = args; m_item = item; m_tab.set(tab); }
+
+    bool Cancel() { return m_args.Cancel(); }
+    void Cancel(bool value) { m_args.Cancel(value); }
+    winrt::DataPackage Data() { return m_args.Data(); }
+    winrt::IInspectable Item() { return m_item; }
+    winrt::TabViewItem Tab() { return m_tab.get(); }
+
+private:
+    winrt::DragItemsStartingEventArgs m_args{};
+    winrt::IInspectable m_item{};
+    tracker_ref<winrt::TabViewItem> m_tab{ this };
+};
+
+class TabViewTabDragCompletedEventArgs :
+    public ReferenceTracker<TabViewTabDragCompletedEventArgs, winrt::implementation::TabViewTabDragCompletedEventArgsT, winrt::composing, winrt::composable>
+{
+public:
+    TabViewTabDragCompletedEventArgs(winrt::DragItemsCompletedEventArgs const& args, winrt::IInspectable const& item, winrt::TabViewItem tab) { m_args = args; m_item = item; m_tab.set(tab); }
+
+    winrt::DataPackageOperation DropResult() { return m_args.DropResult(); }
+    winrt::IInspectable Item() { return m_item; }
+    winrt::TabViewItem Tab() { return m_tab.get(); }
+
+private:
+    winrt::DragItemsCompletedEventArgs m_args{ nullptr };
     winrt::IInspectable m_item{};
     tracker_ref<winrt::TabViewItem> m_tab{ this };
 };
@@ -103,6 +139,8 @@ private:
     void OnListViewGettingFocus(const winrt::IInspectable& sender, const winrt::GettingFocusEventArgs& args);
 
     int GetItemCount();
+
+    winrt::TabViewItem FindTabViewItemFromDragItem(const winrt::IInspectable& item);
 
     tracker_ref<winrt::ColumnDefinition> m_leftContentColumn{ this };
     tracker_ref<winrt::ColumnDefinition> m_tabColumn{ this };

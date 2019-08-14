@@ -33,8 +33,8 @@ public:
     void SelectedItem(winrt::IInspectable const& value);
     winrt::IInspectable SelectedItem();
 
-    void TabItems(winrt::IVector<winrt::IInspectable> const& value);
-    winrt::IVector<winrt::IInspectable> TabItems();
+    void TabItems(winrt::ItemCollection const& value);
+    winrt::ItemCollection TabItems();
 
     void TabItemsSource(winrt::IInspectable const& value);
     winrt::IInspectable TabItemsSource();
@@ -102,12 +102,12 @@ public:
     void SelectionChanged(winrt::event_token const& token);
     winrt::event_token TabCloseRequested(winrt::TypedEventHandler<winrt::TabView, winrt::TabViewTabCloseRequestedEventArgs> const& value);
     void TabCloseRequested(winrt::event_token const& token);
+    winrt::event_token TabDragCompleted(winrt::TypedEventHandler<winrt::TabView, winrt::TabViewTabDragCompletedEventArgs> const& value);
+    void TabDragCompleted(winrt::event_token const& token);
+    winrt::event_token TabDragStarting(winrt::TypedEventHandler<winrt::TabView, winrt::TabViewTabDragStartingEventArgs> const& value);
+    void TabDragStarting(winrt::event_token const& token);
     winrt::event_token TabDroppedOutside(winrt::TypedEventHandler<winrt::TabView, winrt::TabViewTabDroppedOutsideEventArgs> const& value);
     void TabDroppedOutside(winrt::event_token const& token);
-    winrt::event_token TabStripDragItemsCompleted(winrt::TypedEventHandler<winrt::TabView, winrt::DragItemsCompletedEventArgs> const& value);
-    void TabStripDragItemsCompleted(winrt::event_token const& token);
-    winrt::event_token TabStripDragItemsStarting(winrt::DragItemsStartingEventHandler const& value);
-    void TabStripDragItemsStarting(winrt::event_token const& token);
     winrt::event_token TabStripDragOver(winrt::DragEventHandler const& value);
     void TabStripDragOver(winrt::event_token const& token);
     winrt::event_token TabStripDrop(winrt::DragEventHandler const& value);
@@ -116,9 +116,9 @@ public:
     event_source<winrt::TypedEventHandler<winrt::TabView, winrt::IInspectable>> m_addTabButtonClickEventSource;
     event_source<winrt::SelectionChangedEventHandler> m_selectionChangedEventSource;
     event_source<winrt::TypedEventHandler<winrt::TabView, winrt::TabViewTabCloseRequestedEventArgs>> m_tabCloseRequestedEventSource;
+    event_source<winrt::TypedEventHandler<winrt::TabView, winrt::TabViewTabDragCompletedEventArgs>> m_tabDragCompletedEventSource;
+    event_source<winrt::TypedEventHandler<winrt::TabView, winrt::TabViewTabDragStartingEventArgs>> m_tabDragStartingEventSource;
     event_source<winrt::TypedEventHandler<winrt::TabView, winrt::TabViewTabDroppedOutsideEventArgs>> m_tabDroppedOutsideEventSource;
-    event_source<winrt::TypedEventHandler<winrt::TabView, winrt::DragItemsCompletedEventArgs>> m_tabStripDragItemsCompletedEventSource;
-    event_source<winrt::DragItemsStartingEventHandler> m_tabStripDragItemsStartingEventSource;
     event_source<winrt::DragEventHandler> m_tabStripDragOverEventSource;
     event_source<winrt::DragEventHandler> m_tabStripDropEventSource;
 

@@ -14,9 +14,13 @@ using Windows.UI.Xaml.Automation;
 using TabView = Microsoft.UI.Xaml.Controls.TabView;
 using TabViewItem = Microsoft.UI.Xaml.Controls.TabViewItem;
 using TabViewTabCloseRequestedEventArgs = Microsoft.UI.Xaml.Controls.TabViewTabCloseRequestedEventArgs;
+using TabViewTabDragStartingEventArgs = Microsoft.UI.Xaml.Controls.TabViewTabDragStartingEventArgs;
+using TabViewTabDragCompletedEventArgs = Microsoft.UI.Xaml.Controls.TabViewTabDragCompletedEventArgs;
 using SymbolIconSource = Microsoft.UI.Xaml.Controls.SymbolIconSource;
 using System.Collections.ObjectModel;
 using Windows.Devices.PointOfService;
+using Windows.ApplicationModel.DataTransfer;
+using System.Diagnostics;
 
 namespace MUXControlsTestApp
 {
@@ -173,6 +177,100 @@ namespace MUXControlsTestApp
             if (tab != null)
             {
                 TabDroppedOutsideTextBlock.Text = tab.Header.ToString();
+            }
+        }
+
+        // Drag/drop stuff
+
+        private const string DataIdentifier = "MyTabItem";
+        private const string DataTabView = "MyTabView";
+
+        private TabViewItem FindTabViewItemFromContent(TabView tabView, object content)
+        {
+            var numItems = tabView.TabItems.Count;
+            for (int i = 0; i < numItems; i++)
+            {
+                var tabItem = tabView.ContainerFromIndex(i) as TabViewItem;
+                if (tabItem.Content == content)
+                {
+                    return tabItem;
+                }
+            }
+            return null;
+        }
+
+        private void OnTabDragStarting(object sender, TabViewTabDragStartingEventArgs e)
+        {
+            // Set the drag data to the tab
+            e.Data.Properties.Add(DataIdentifier, e.Tab);
+            e.Data.Properties.Add(DataTabView, sender as TabView);
+
+            // And indicate that we can move it 
+            e.Data.RequestedOperation = DataPackageOperation.Move;
+        }
+
+        private void OnTabStripDragOver(object sender, DragEventArgs e)
+        {
+            if (e.DataView.Properties.ContainsKey(DataIdentifier))
+            {
+                e.AcceptedOperation = DataPackageOperation.Move;
+            }
+        }
+
+        private void OnTabStripDrop(object sender, DragEventArgs e)
+        {
+            // This event is called when we're dragging between different TabViews
+            // It is responsible for handling the drop of the item into the second TabView
+
+            object obj;
+            object objOriginTabView;
+            if (e.DataView.Properties.TryGetValue(DataIdentifier, out obj) && e.DataView.Properties.TryGetValue(DataTabView, out objOriginTabView))
+            {
+                // TODO - BUG: obj should never be null, but occassionally is. Why?
+                if (obj == null || objOriginTabView == null)
+                {
+                    return;
+                }
+
+                var originTabView = objOriginTabView as TabView;
+                var destinationTabView = sender as TabView;
+                var destinationItems = destinationTabView.TabItems;
+                var tabViewItem = obj as TabViewItem;
+
+                if (destinationItems != null)
+                {
+                    // First we need to get the position in the List to drop to
+                    var index = -1;
+
+                    // Determine which items in the list our pointer is inbetween.
+                    for (int i = 0; i < destinationTabView.TabItems.Count; i++)
+                    {
+                        var item = destinationTabView.ContainerFromIndex(i) as TabViewItem;
+
+                        if (e.GetPosition(item).X - item.ActualWidth < 0)
+                        {
+                            index = i;
+                            break;
+                        }
+                    }
+
+                    // Remove item from the old TabView
+                    originTabView.TabItems.Remove(tabViewItem);
+
+                    if (index < 0)
+                    {
+                        // We didn't find a transition point, so we're at the end of the list
+                        destinationItems.Add(tabViewItem);
+                    }
+                    else if (index < destinationTabView.TabItems.Count)
+                    {
+                        // Otherwise, insert at the provided index.
+                        destinationItems.Insert(index, tabViewItem);
+                    }
+
+                    // Select the newly dragged tab
+                    destinationTabView.SelectedItem = tabViewItem;
+                }
             }
         }
     }

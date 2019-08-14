@@ -27,6 +27,25 @@ runtimeclass TabViewTabDroppedOutsideEventArgs
 
 [WUXC_VERSION_MUXONLY]
 [webhosthidden]
+runtimeclass TabViewTabDragStartingEventArgs
+{
+    Boolean Cancel { get; set; };
+    Windows.ApplicationModel.DataTransfer.DataPackage Data { get; };
+    Object Item { get; };
+    TabViewItem Tab { get; };
+}
+
+[WUXC_VERSION_MUXONLY]
+[webhosthidden]
+runtimeclass TabViewTabDragCompletedEventArgs
+{
+    Windows.ApplicationModel.DataTransfer.DataPackageOperation DropResult { get; };
+    Object Item { get; };
+    TabViewItem Tab { get; };
+}
+
+[WUXC_VERSION_MUXONLY]
+[webhosthidden]
 unsealed runtimeclass TabView : Windows.UI.Xaml.Controls.Control
 {
     TabView();
@@ -78,8 +97,8 @@ unsealed runtimeclass TabView : Windows.UI.Xaml.Controls.Control
 
     event Windows.UI.Xaml.Controls.SelectionChangedEventHandler SelectionChanged;
 
-    event Windows.UI.Xaml.Controls.DragItemsStartingEventHandler TabStripDragItemsStarting;
-    event Windows.Foundation.TypedEventHandler<TabView, Windows.UI.Xaml.Controls.DragItemsCompletedEventArgs> TabStripDragItemsCompleted;
+    event Windows.Foundation.TypedEventHandler<TabView, TabViewTabDragStartingEventArgs> TabDragStarting;
+    event Windows.Foundation.TypedEventHandler<TabView, TabViewTabDragCompletedEventArgs> TabDragCompleted;
     event Windows.UI.Xaml.DragEventHandler TabStripDragOver;
     event Windows.UI.Xaml.DragEventHandler TabStripDrop;
 

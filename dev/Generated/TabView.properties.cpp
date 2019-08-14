@@ -30,9 +30,9 @@ TabViewProperties::TabViewProperties()
     : m_addTabButtonClickEventSource{static_cast<TabView*>(this)}
     , m_selectionChangedEventSource{static_cast<TabView*>(this)}
     , m_tabCloseRequestedEventSource{static_cast<TabView*>(this)}
+    , m_tabDragCompletedEventSource{static_cast<TabView*>(this)}
+    , m_tabDragStartingEventSource{static_cast<TabView*>(this)}
     , m_tabDroppedOutsideEventSource{static_cast<TabView*>(this)}
-    , m_tabStripDragItemsCompletedEventSource{static_cast<TabView*>(this)}
-    , m_tabStripDragItemsStartingEventSource{static_cast<TabView*>(this)}
     , m_tabStripDragOverEventSource{static_cast<TabView*>(this)}
     , m_tabStripDropEventSource{static_cast<TabView*>(this)}
 {
@@ -134,10 +134,10 @@ void TabViewProperties::EnsureProperties()
         s_TabItemsProperty =
             InitializeDependencyProperty(
                 L"TabItems",
-                winrt::name_of<winrt::IVector<winrt::IInspectable>>(),
+                winrt::name_of<winrt::ItemCollection>(),
                 winrt::name_of<winrt::TabView>(),
                 false /* isAttached */,
-                ValueHelper<winrt::IVector<winrt::IInspectable>>::BoxedDefaultValue(),
+                ValueHelper<winrt::ItemCollection>::BoxedDefaultValue(),
                 nullptr);
     }
     if (!s_TabItemsSourceProperty)
@@ -355,14 +355,14 @@ winrt::IInspectable TabViewProperties::SelectedItem()
     return ValueHelper<winrt::IInspectable>::CastOrUnbox(static_cast<TabView*>(this)->GetValue(s_SelectedItemProperty));
 }
 
-void TabViewProperties::TabItems(winrt::IVector<winrt::IInspectable> const& value)
+void TabViewProperties::TabItems(winrt::ItemCollection const& value)
 {
-    static_cast<TabView*>(this)->SetValue(s_TabItemsProperty, ValueHelper<winrt::IVector<winrt::IInspectable>>::BoxValueIfNecessary(value));
+    static_cast<TabView*>(this)->SetValue(s_TabItemsProperty, ValueHelper<winrt::ItemCollection>::BoxValueIfNecessary(value));
 }
 
-winrt::IVector<winrt::IInspectable> TabViewProperties::TabItems()
+winrt::ItemCollection TabViewProperties::TabItems()
 {
-    return ValueHelper<winrt::IVector<winrt::IInspectable>>::CastOrUnbox(static_cast<TabView*>(this)->GetValue(s_TabItemsProperty));
+    return ValueHelper<winrt::ItemCollection>::CastOrUnbox(static_cast<TabView*>(this)->GetValue(s_TabItemsProperty));
 }
 
 void TabViewProperties::TabItemsSource(winrt::IInspectable const& value)
@@ -475,6 +475,26 @@ void TabViewProperties::TabCloseRequested(winrt::event_token const& token)
     m_tabCloseRequestedEventSource.remove(token);
 }
 
+winrt::event_token TabViewProperties::TabDragCompleted(winrt::TypedEventHandler<winrt::TabView, winrt::TabViewTabDragCompletedEventArgs> const& value)
+{
+    return m_tabDragCompletedEventSource.add(value);
+}
+
+void TabViewProperties::TabDragCompleted(winrt::event_token const& token)
+{
+    m_tabDragCompletedEventSource.remove(token);
+}
+
+winrt::event_token TabViewProperties::TabDragStarting(winrt::TypedEventHandler<winrt::TabView, winrt::TabViewTabDragStartingEventArgs> const& value)
+{
+    return m_tabDragStartingEventSource.add(value);
+}
+
+void TabViewProperties::TabDragStarting(winrt::event_token const& token)
+{
+    m_tabDragStartingEventSource.remove(token);
+}
+
 winrt::event_token TabViewProperties::TabDroppedOutside(winrt::TypedEventHandler<winrt::TabView, winrt::TabViewTabDroppedOutsideEventArgs> const& value)
 {
     return m_tabDroppedOutsideEventSource.add(value);
@@ -483,26 +503,6 @@ winrt::event_token TabViewProperties::TabDroppedOutside(winrt::TypedEventHandler
 void TabViewProperties::TabDroppedOutside(winrt::event_token const& token)
 {
     m_tabDroppedOutsideEventSource.remove(token);
-}
-
-winrt::event_token TabViewProperties::TabStripDragItemsCompleted(winrt::TypedEventHandler<winrt::TabView, winrt::DragItemsCompletedEventArgs> const& value)
-{
-    return m_tabStripDragItemsCompletedEventSource.add(value);
-}
-
-void TabViewProperties::TabStripDragItemsCompleted(winrt::event_token const& token)
-{
-    m_tabStripDragItemsCompletedEventSource.remove(token);
-}
-
-winrt::event_token TabViewProperties::TabStripDragItemsStarting(winrt::DragItemsStartingEventHandler const& value)
-{
-    return m_tabStripDragItemsStartingEventSource.add(value);
-}
-
-void TabViewProperties::TabStripDragItemsStarting(winrt::event_token const& token)
-{
-    m_tabStripDragItemsStartingEventSource.remove(token);
 }
 
 winrt::event_token TabViewProperties::TabStripDragOver(winrt::DragEventHandler const& value)
