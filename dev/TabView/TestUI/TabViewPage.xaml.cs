@@ -13,7 +13,7 @@ using Windows.UI.Xaml.Automation;
 
 using TabView = Microsoft.UI.Xaml.Controls.TabView;
 using TabViewItem = Microsoft.UI.Xaml.Controls.TabViewItem;
-using TabViewTabClosingEventArgs = Microsoft.UI.Xaml.Controls.TabViewTabClosingEventArgs;
+using TabViewTabCloseRequestedEventArgs = Microsoft.UI.Xaml.Controls.TabViewTabCloseRequestedEventArgs;
 using SymbolIconSource = Microsoft.UI.Xaml.Controls.SymbolIconSource;
 using System.Collections.ObjectModel;
 using Windows.Devices.PointOfService;
@@ -49,14 +49,14 @@ namespace MUXControlsTestApp
                 item.Content = "This is tab " + i + ".";
                 itemSource.Add(item);
             }
-            DataBindingTabView.ItemsSource = itemSource;
+            DataBindingTabView.TabItemsSource = itemSource;
         }
 
-        public void IsCloseableCheckBox_CheckChanged(object sender, RoutedEventArgs e)
+        public void IsClosableCheckBox_CheckChanged(object sender, RoutedEventArgs e)
         {
             if (FirstTab != null)
             {
-                FirstTab.IsCloseable = (bool)IsCloseableCheckBox.IsChecked;
+                FirstTab.IsClosable = (bool)IsClosableCheckBox.IsChecked;
             }
         }
 
@@ -70,7 +70,7 @@ namespace MUXControlsTestApp
                 item.Content = item.Header;
                 item.SetValue(AutomationProperties.NameProperty, item.Header);
 
-                Tabs.Items.Add(item);
+                Tabs.TabItems.Add(item);
 
                 _newTabNumber++;
             }
@@ -78,9 +78,9 @@ namespace MUXControlsTestApp
 
         public void RemoveTabButton_Click(object sender, RoutedEventArgs e)
         {
-            if (Tabs != null && Tabs.Items.Count > 0)
+            if (Tabs != null && Tabs.TabItems.Count > 0)
             {
-                Tabs.Items.RemoveAt(Tabs.Items.Count - 1);
+                Tabs.TabItems.RemoveAt(Tabs.TabItems.Count - 1);
             }
         }
 
@@ -89,7 +89,7 @@ namespace MUXControlsTestApp
         {
             if (Tabs != null)
             {
-                Tabs.SelectedItem = Tabs.Items[1];
+                Tabs.SelectedItem = Tabs.TabItems[1];
             }
         }
 
@@ -151,22 +151,28 @@ namespace MUXControlsTestApp
             SelectedIndexTextBlock.Text = Tabs.SelectedIndex.ToString();
         }
 
-        private void TabViewTabClosing(object sender, Microsoft.UI.Xaml.Controls.TabViewTabClosingEventArgs e)
+        private void TabViewTabCloseRequested(object sender, Microsoft.UI.Xaml.Controls.TabViewTabCloseRequestedEventArgs e)
         {
-            e.Cancel = (bool)CancelCloseCheckBox.IsChecked;
+            if ((bool)HandleTabCloseRequestedCheckBox.IsChecked)
+            {
+                Tabs.TabItems.Remove(e.Tab);
+            }
         }
 
-        private void FirstTab_TabClosing(object sender, Microsoft.UI.Xaml.Controls.TabViewTabClosingEventArgs e)
+        private void FirstTab_CloseRequested(object sender, Microsoft.UI.Xaml.Controls.TabViewTabCloseRequestedEventArgs e)
         {
-            e.Cancel = (bool)CancelItemCloseCheckBox.IsChecked;
+            if ((bool)HandleTabItemCloseRequestedCheckBox.IsChecked)
+            {
+                Tabs.TabItems.Remove(e.Tab);
+            }
         }
 
-        private void TabViewTabDraggedOutside(object sender, Microsoft.UI.Xaml.Controls.TabViewTabDraggedOutsideEventArgs e)
+        private void TabViewTabDroppedOutside(object sender, Microsoft.UI.Xaml.Controls.TabViewTabDroppedOutsideEventArgs e)
         {
             TabViewItem tab = e.Tab;
             if (tab != null)
             {
-                TabDraggedOutsideTextBlock.Text = tab.Header.ToString();
+                TabDroppedOutsideTextBlock.Text = tab.Header.ToString();
             }
         }
     }

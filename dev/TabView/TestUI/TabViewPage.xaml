@@ -18,10 +18,10 @@
             </Grid.ColumnDefinitions>
 
             <StackPanel Padding="12" Background="LightGray" Width="250">
-                <CheckBox x:Name="IsCloseableCheckBox" AutomationProperties.Name="IsCloseableCheckBox" Checked="IsCloseableCheckBox_CheckChanged" Unchecked="IsCloseableCheckBox_CheckChanged" IsChecked="True" Content="IsCloseable on first tab"/>
-                <CheckBox x:Name="CancelCloseCheckBox" AutomationProperties.Name="CancelCloseCheckBox" Content="Cancel Closing event"/>
-                <CheckBox x:Name="CancelItemCloseCheckBox" AutomationProperties.Name="CancelItemCloseCheckBox" Content="Cancel Closing on first item"/>
-                <CheckBox x:Name="IsAddButtonVisibleCheckBox" AutomationProperties.Name="IsAddButtonVisibleCheckBox" Content="Add button visible" IsChecked="{x:Bind Tabs.IsAddButtonVisible, Mode=TwoWay}"/>
+                <CheckBox x:Name="IsClosableCheckBox" AutomationProperties.Name="IsClosableCheckBox" Checked="IsClosableCheckBox_CheckChanged" Unchecked="IsClosableCheckBox_CheckChanged" IsChecked="True" Content="IsClosable on first tab"/>
+                <CheckBox x:Name="HandleTabCloseRequestedCheckBox" AutomationProperties.Name="HandleTabCloseRequestedCheckBox" Content="Handle TabView tab close" IsChecked="True"/>
+                <CheckBox x:Name="HandleTabItemCloseRequestedCheckBox" AutomationProperties.Name="HandleTabItemCloseRequestedCheckBox" Content="Handle TabViewItem close"/>
+                <CheckBox x:Name="IsAddButtonVisibleCheckBox" AutomationProperties.Name="IsAddButtonVisibleCheckBox" Content="Add button visible" IsChecked="{x:Bind Tabs.IsAddTabButtonVisible, Mode=TwoWay}"/>
 
                 <Button x:Name="RemoveTabButton" AutomationProperties.Name="RemoveTabButton" Content="Remove Tab" Margin="0,0,0,8" Click="RemoveTabButton_Click"/>
                 <Button x:Name="SelectItemButton" AutomationProperties.Name="SelectItemButton" Content="Select Item 1" Margin="0,0,0,8" Click="SelectItemButton_Click"/>
@@ -43,8 +43,8 @@
                 </StackPanel>
 
                 <StackPanel Orientation="Horizontal" Margin="0,0,0,8">
-                    <TextBlock>Tab dragged out:</TextBlock>
-                    <TextBlock x:Name="TabDraggedOutsideTextBlock" AutomationProperties.Name="TabDraggedOutsideTextBlock" Margin="4,0,0,0" Text=""/>
+                    <TextBlock>Tab dropped out:</TextBlock>
+                    <TextBlock x:Name="TabDroppedOutsideTextBlock" AutomationProperties.Name="TabDroppedOutsideTextBlock" Margin="4,0,0,0" Text=""/>
                 </StackPanel>
 
                 <StackPanel Orientation="Horizontal" Margin="0,0,0,8">
@@ -69,11 +69,11 @@
                     TabWidthMode="Equal"
                     SelectedIndex="0"
                     SelectionChanged="TabViewSelectionChanged"
-                    TabClosing="TabViewTabClosing"
-                    TabDraggedOutside="TabViewTabDraggedOutside"
-                    AddButtonClick="AddButtonClick">
+                    TabCloseRequested="TabViewTabCloseRequested"
+                    TabDroppedOutside="TabViewTabDroppedOutside"
+                    AddTabButtonClick="AddButtonClick">
 
-                    <controls:TabView.RightCustomContent>
+                    <controls:TabView.TabStripFooter>
                         <Grid>
                             <Grid.ColumnDefinitions>
                                 <ColumnDefinition Width="Auto"/>
@@ -83,11 +83,11 @@
                             <TextBlock Grid.Column="0" Text="Middle" Margin="6,3,6,0" VerticalAlignment="Center"/>
                             <TextBlock Grid.Column="2" Text="Right" Margin="6,3,6,0" VerticalAlignment="Center"/>
                         </Grid>
-                    </controls:TabView.RightCustomContent>
+                    </controls:TabView.TabStripFooter>
 
-                    <controls:TabView.Items>
+                    <controls:TabView.TabItems>
 
-                        <controls:TabViewItem x:Name="FirstTab" AutomationProperties.Name="FirstTab" Header="Home" TabClosing="FirstTab_TabClosing" ToolTipService.ToolTip="Custom Tooltip">
+                        <controls:TabViewItem x:Name="FirstTab" AutomationProperties.Name="FirstTab" Header="Home" CloseRequested="FirstTab_CloseRequested" ToolTipService.ToolTip="Custom Tooltip">
                             <controls:TabViewItem.IconSource>
                                 <controls:SymbolIconSource Symbol="Home"/>
                             </controls:TabViewItem.IconSource>
@@ -98,7 +98,7 @@
                             </StackPanel>
                         </controls:TabViewItem>
 
-                        <controls:TabViewItem x:Name="SecondTab" AutomationProperties.Name="SecondTab" Header="Shop" IsCloseable="True">
+                        <controls:TabViewItem x:Name="SecondTab" AutomationProperties.Name="SecondTab" Header="Shop" IsClosable="True">
                             <controls:TabViewItem.IconSource>
                                 <controls:SymbolIconSource Symbol="Shop"/>
                             </controls:TabViewItem.IconSource>
@@ -116,7 +116,7 @@
                             </StackPanel>
                         </controls:TabViewItem>
 
-                        <controls:TabViewItem x:Name="NotCloseableTab" AutomationProperties.Name="NotCloseableTab" Header="Video" IsCloseable="False">
+                        <controls:TabViewItem x:Name="NotCloseableTab" AutomationProperties.Name="NotCloseableTab" Header="Video" IsClosable="False">
                             <controls:TabViewItem.IconSource>
                                 <controls:SymbolIconSource Symbol="Video"/>
                             </controls:TabViewItem.IconSource>
@@ -134,13 +134,13 @@
                             <TextBlock x:Name="LastTabContent" AutomationProperties.Name="LastTabContent" Padding="16">Contact text</TextBlock>
                         </controls:TabViewItem>
 
-                    </controls:TabView.Items>
+                    </controls:TabView.TabItems>
                 </controls:TabView>
 
                 <controls:TabView x:Name="DataBindingTabView" Grid.Row="1"
-                    IsAddButtonVisible="false">
+                    IsAddTabButtonVisible="false">
 
-                    <controls:TabView.ItemTemplate>
+                    <controls:TabView.TabItemTemplate>
                         <DataTemplate x:DataType="local:TabDataItem">
                             <controls:TabViewItem Header="{x:Bind Header}" IconSource="{x:Bind IconSource}" Content="{x:Bind Content}">
                                 <controls:TabViewItem.ContentTemplate>
@@ -152,7 +152,7 @@
                                 </controls:TabViewItem.ContentTemplate>
                             </controls:TabViewItem>
                         </DataTemplate>
-                    </controls:TabView.ItemTemplate>
+                    </controls:TabView.TabItemTemplate>
                 </controls:TabView>
             </Grid>
         </Grid>
