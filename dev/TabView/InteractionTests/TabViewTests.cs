@@ -206,6 +206,33 @@ namespace Windows.UI.Xaml.Tests.MUXControls.InteractionTests
         }
 
         [TestMethod]
+        public void DragBetweenTabViewsTest()
+        {
+            using (var setup = new TestSetupHelper("TabView Tests"))
+            {
+                UIObject firstTab = FindElement.ByName("FirstTab");
+                Verify.IsNotNull(firstTab);
+
+                UIObject dropTarget = FindElement.ByName("TabInSecondTabView");
+                Verify.IsNotNull(dropTarget);
+
+                Log.Comment("Home tab should be in the first tab view.");
+                PressButtonAndVerifyText("GetFirstTabLocationButton", "FirstTabLocationTextBlock", "FirstTabView");
+
+                InputHelper.DragToTarget(firstTab, dropTarget);
+                Wait.ForIdle();
+                ElementCache.Refresh();
+
+                Log.Comment("Home tab should now be in the second tab view.");
+                PressButtonAndVerifyText("GetFirstTabLocationButton", "FirstTabLocationTextBlock", "SecondTabView");
+
+                Log.Comment("Home tab content should be visible.");
+                UIObject tabContent = FindElement.ByName("FirstTabContent");
+                Verify.IsNotNull(tabContent);
+            }
+        }
+
+        [TestMethod]
         public void AddButtonTest()
         {
             using (var setup = new TestSetupHelper("TabView Tests"))
@@ -360,16 +387,16 @@ namespace Windows.UI.Xaml.Tests.MUXControls.InteractionTests
             using (var setup = new TestSetupHelper("TabView Tests"))
             {
                 Log.Comment("If the app sets custom tooltip text, it should be preserved.");
-                VerifyTooltipText("GetTab0ToolTipButton", "Tab0ToolTipTextBlock", "Custom Tooltip");
+                PressButtonAndVerifyText("GetTab0ToolTipButton", "Tab0ToolTipTextBlock", "Custom Tooltip");
 
                 Log.Comment("If the app does not set a custom tooltip, it should be the same as the header text.");
-                VerifyTooltipText("GetTab1ToolTipButton", "Tab1ToolTipTextBlock", "Shop");
+                PressButtonAndVerifyText("GetTab1ToolTipButton", "Tab1ToolTipTextBlock", "Shop");
 
                 Button changeShopTextButton = FindElement.ByName<Button>("ChangeShopTextButton");
                 changeShopTextButton.InvokeAndWait();
 
                 Log.Comment("If the tab's header changes, the tooltip should update.");
-                VerifyTooltipText("GetTab1ToolTipButton", "Tab1ToolTipTextBlock", "Changed");
+                PressButtonAndVerifyText("GetTab1ToolTipButton", "Tab1ToolTipTextBlock", "Changed");
             }
         }
 
@@ -382,17 +409,17 @@ namespace Windows.UI.Xaml.Tests.MUXControls.InteractionTests
                 customTooltipButton.InvokeAndWait();
 
                 Log.Comment("If the app updates the tooltip, it should change to their custom one.");
-                VerifyTooltipText("GetTab1ToolTipButton", "Tab1ToolTipTextBlock", "Custom");
+                PressButtonAndVerifyText("GetTab1ToolTipButton", "Tab1ToolTipTextBlock", "Custom");
 
                 Button changeShopTextButton = FindElement.ByName<Button>("ChangeShopTextButton");
                 changeShopTextButton.InvokeAndWait();
 
                 Log.Comment("The tooltip should not update if the header changes.");
-                VerifyTooltipText("GetTab1ToolTipButton", "Tab1ToolTipTextBlock", "Custom");
+                PressButtonAndVerifyText("GetTab1ToolTipButton", "Tab1ToolTipTextBlock", "Custom");
             }
         }
 
-        public void VerifyTooltipText(String buttonName, String textBlockName, String expectedText)
+        public void PressButtonAndVerifyText(String buttonName, String textBlockName, String expectedText)
         {
             Button button = FindElement.ByName<Button>(buttonName);
             button.InvokeAndWait();

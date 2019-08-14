@@ -21,6 +21,7 @@ using System.Collections.ObjectModel;
 using Windows.Devices.PointOfService;
 using Windows.ApplicationModel.DataTransfer;
 using System.Diagnostics;
+using System.Runtime.InteropServices.WindowsRuntime;
 
 namespace MUXControlsTestApp
 {
@@ -136,6 +137,28 @@ namespace MUXControlsTestApp
             {
                 textBlock.Text = tooltip.ToString();
             }
+        }
+
+        public void GetFirstTabLocationButton_Click(object sender, RoutedEventArgs e)
+        {
+            FrameworkElement element = FirstTab as FrameworkElement;
+            while (element != null)
+            {
+                if (element == Tabs)
+                {
+                    FirstTabLocationTextBlock.Text = "FirstTabView";
+                    return;
+                }
+                if (element == SecondTabView)
+                {
+                    FirstTabLocationTextBlock.Text = "SecondTabView";
+                    return;
+                }
+
+                element = VisualTreeHelper.GetParent(element) as FrameworkElement;
+            }
+
+            FirstTabLocationTextBlock.Text = "";
         }
 
         private void TabWidthComboBox_SelectionChanged(object sender, SelectionChangedEventArgs e)

@@ -134,10 +134,10 @@ void TabViewProperties::EnsureProperties()
         s_TabItemsProperty =
             InitializeDependencyProperty(
                 L"TabItems",
-                winrt::name_of<winrt::ItemCollection>(),
+                winrt::name_of<winrt::IVector<winrt::IInspectable>>(),
                 winrt::name_of<winrt::TabView>(),
                 false /* isAttached */,
-                ValueHelper<winrt::ItemCollection>::BoxedDefaultValue(),
+                ValueHelper<winrt::IVector<winrt::IInspectable>>::BoxedDefaultValue(),
                 nullptr);
     }
     if (!s_TabItemsSourceProperty)
@@ -355,14 +355,14 @@ winrt::IInspectable TabViewProperties::SelectedItem()
     return ValueHelper<winrt::IInspectable>::CastOrUnbox(static_cast<TabView*>(this)->GetValue(s_SelectedItemProperty));
 }
 
-void TabViewProperties::TabItems(winrt::ItemCollection const& value)
+void TabViewProperties::TabItems(winrt::IVector<winrt::IInspectable> const& value)
 {
-    static_cast<TabView*>(this)->SetValue(s_TabItemsProperty, ValueHelper<winrt::ItemCollection>::BoxValueIfNecessary(value));
+    static_cast<TabView*>(this)->SetValue(s_TabItemsProperty, ValueHelper<winrt::IVector<winrt::IInspectable>>::BoxValueIfNecessary(value));
 }
 
-winrt::ItemCollection TabViewProperties::TabItems()
+winrt::IVector<winrt::IInspectable> TabViewProperties::TabItems()
 {
-    return ValueHelper<winrt::ItemCollection>::CastOrUnbox(static_cast<TabView*>(this)->GetValue(s_TabItemsProperty));
+    return ValueHelper<winrt::IVector<winrt::IInspectable>>::CastOrUnbox(static_cast<TabView*>(this)->GetValue(s_TabItemsProperty));
 }
 
 void TabViewProperties::TabItemsSource(winrt::IInspectable const& value)

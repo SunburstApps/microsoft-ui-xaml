@@ -33,8 +33,8 @@ public:
     void SelectedItem(winrt::IInspectable const& value);
     winrt::IInspectable SelectedItem();
 
-    void TabItems(winrt::ItemCollection const& value);
-    winrt::ItemCollection TabItems();
+    void TabItems(winrt::IVector<winrt::IInspectable> const& value);
+    winrt::IVector<winrt::IInspectable> TabItems();
 
     void TabItemsSource(winrt::IInspectable const& value);
     winrt::IInspectable TabItemsSource();
