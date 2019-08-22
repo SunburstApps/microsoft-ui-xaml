@@ -68,6 +68,7 @@ void TabView::OnApplyTemplate()
     winrt::IControlProtected controlProtected{ *this };
 
     m_tabContentPresenter.set(GetTemplateChildT<winrt::ContentPresenter>(L"TabContentPresenter", controlProtected));
+    m_rightContentPresenter.set(GetTemplateChildT<winrt::ContentPresenter>(L"LeftContentPresenter", controlProtected));
     m_rightContentPresenter.set(GetTemplateChildT<winrt::ContentPresenter>(L"RightContentPresenter", controlProtected));
     
     m_leftContentColumn.set(GetTemplateChildT<winrt::ColumnDefinition>(L"LeftContentColumn", controlProtected));
@@ -240,6 +241,8 @@ void TabView::OnListViewLoaded(const winrt::IInspectable&, const winrt::RoutedEv
             auto scrollViewer = SharedHelpers::FindInVisualTreeByName(listView, L"ScrollViewer").as<winrt::FxScrollViewer>();
             if (scrollViewer)
             {
+                m_scrollContentPresenter.set(SharedHelpers::FindInVisualTreeByName(scrollViewer, L"ScrollContentPresenter").as<winrt::ScrollContentPresenter>());
+
                 m_scrollViewerLoadedRevoker = scrollViewer.Loaded(winrt::auto_revoke, { this, &TabView::OnScrollViewerLoaded });
             }
             return scrollViewer;
@@ -477,6 +480,44 @@ void TabView::OnScrollIncreaseClick(const winrt::IInspectable&, const winrt::Rou
     }
 }
 
+winrt::Size TabView::MeasureOverride(winrt::Size const& availableSize)
+{
+    auto size = __super::MeasureOverride(availableSize);
+
+    double width = 0.0;
+    if (auto leftContentPresenter = m_leftContentPresenter.get())
+    {
+        width += leftContentPresenter.DesiredSize().Width;
+    }
+    if (auto addButton = m_addButton.get())
+    {
+        width += addButton.DesiredSize().Width;
+    }
+    if (auto rightContentPresenter = m_rightContentPresenter.get())
+    {
+        width += rightContentPresenter.DesiredSize().Width;
+    }
+
+    int numItems = static_cast<int>(TabItems().Size());
+
+    if (TabWidthMode() == winrt::TabViewWidthMode::SizeToContent)
+    {
+        if (auto scrollContentPresenter = m_scrollContentPresenter.get())
+        {
+            width += scrollContentPresenter.ExtentWidth();
+        }
+    }
+    else if (TabWidthMode() == winrt::TabViewWidthMode::Equal)
+    {
+        double maxTabWidth = unbox_value<double>(SharedHelpers::FindResource(c_tabViewItemMaxWidthName, winrt::Application::Current().Resources(), box_value(c_tabMaximumWidth)));
+        width += numItems * maxTabWidth;
+    }
+
+    size.Width = std::min(static_cast<float>(width), availableSize.Width);
+    
+    return size;
+}
+
 void TabView::UpdateTabWidths()
 {
     double tabWidth = std::numeric_limits<double>::quiet_NaN();
@@ -511,10 +552,17 @@ void TabView::UpdateTabWidths()
             {
                 tabColumn.MaxWidth(availableWidth);
                 tabColumn.Width(winrt::GridLengthHelper::FromValueAndType(1.0, winrt::GridUnitType::Auto));
+
                 if (auto listview = m_listView.get())
                 {
                     listview.MaxWidth(availableWidth);
-                    winrt::FxScrollViewer::SetHorizontalScrollBarVisibility(listview, winrt::Windows::UI::Xaml::Controls::ScrollBarVisibility::Auto);
+
+                    if (auto scrollContentPresenter = m_scrollContentPresenter.get())
+                    {
+                        winrt::FxScrollViewer::SetHorizontalScrollBarVisibility(listview, scrollContentPresenter.ExtentWidth() > availableWidth
+                            ? winrt::Windows::UI::Xaml::Controls::ScrollBarVisibility::Visible
+                            : winrt::Windows::UI::Xaml::Controls::ScrollBarVisibility::Hidden);
+                    }
                 }
             }
             else if (TabWidthMode() == winrt::TabViewWidthMode::Equal)
